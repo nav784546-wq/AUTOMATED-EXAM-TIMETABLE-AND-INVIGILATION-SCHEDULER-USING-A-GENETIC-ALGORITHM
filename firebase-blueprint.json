@@ -1,0 +1,383 @@
+{
+  "entities": {
+    "Department": {
+      "title": "Department",
+      "description": "An academic department or degree program.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "createdBy", "updatedBy"]
+    },
+    "Batch": {
+      "title": "Batch",
+      "description": "An academic admission batch / year cohort.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "createdBy", "updatedBy"]
+    },
+    "Section": {
+      "title": "Section",
+      "description": "A class section belonging to an academic department.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "department": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "department", "name", "createdBy", "updatedBy"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "An academic course or examination subject.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "code": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "department": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "batch": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "section": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "semester": { "type": "integer" },
+        "enrolledCount": { "type": "integer" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "code", "name", "department", "semester", "enrolledCount", "createdBy", "updatedBy"]
+    },
+    "Hall": {
+      "title": "Hall",
+      "description": "An examination hall with seating capacity and availability status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "hallNumber": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "building": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "capacity": { "type": "integer" },
+        "available": { "type": "boolean" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "hallNumber", "building", "capacity", "available", "createdBy", "updatedBy"]
+    },
+    "Faculty": {
+      "title": "Faculty",
+      "description": "A faculty member eligible for examination invigilation duties.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "employeeId": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "department": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "designation": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "email": { "type": "string", "minLength": 0, "maxLength": 160 },
+        "phone": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "available": { "type": "boolean" },
+        "maxDuties": { "type": "integer" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "employeeId", "name", "department", "available", "maxDuties", "createdBy", "updatedBy"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "An enrolled student assigned to a department, batch, and section.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "regNo": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "department": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "section": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "batch": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "semester": { "type": "integer" },
+        "enrolledSubjectIds": { "type": "array" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "regNo", "name", "department", "section", "batch", "semester", "createdBy", "updatedBy"]
+    },
+    "SubsectionAllocation": {
+      "title": "SubsectionAllocation",
+      "description": "An approved department-wise subsection division snapshot.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "department": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "subsectionCount": { "type": "integer" },
+        "totalStudents": { "type": "integer" },
+        "assignments": { "type": "array" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "department", "subsectionCount", "totalStudents", "assignments", "createdBy", "updatedBy"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "An optimization run schedule and genetic algorithm metrics.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "schedule": { "type": "array" },
+        "bestFitness": { "type": "number" },
+        "history": { "type": "array" },
+        "conflicts": { "type": "object" },
+        "convergedAtGeneration": { "type": "integer" },
+        "executionTimeMs": { "type": "number" },
+        "scope": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "schedule", "bestFitness", "conflicts", "createdBy", "updatedBy"]
+    },
+    "Timetable": {
+      "title": "Timetable",
+      "description": "A saved active examination timetable with hall and invigilator assignments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "scheduleId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "entries": { "type": "array" },
+        "scope": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "scheduleId", "entries", "createdBy", "updatedBy"]
+    },
+    "ConflictReport": {
+      "title": "ConflictReport",
+      "description": "A generated conflict analysis and faculty override report.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "scheduleId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "studentClashes": { "type": "integer" },
+        "invigilatorConflicts": { "type": "integer" },
+        "capacityViolations": { "type": "integer" },
+        "hallDoubleBookings": { "type": "integer" },
+        "totalHardViolations": { "type": "integer" },
+        "utilizationRate": { "type": "number" },
+        "workloadStdDev": { "type": "number" },
+        "flaggedItems": { "type": "array" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "scheduleId", "totalHardViolations", "createdBy", "updatedBy"]
+    },
+    "HallAllocation": {
+      "title": "HallAllocation",
+      "description": "A confirmed session-level student-to-examination-hall allocation record with contiguous registration number ranges.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "examDate": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "session": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "selectedDepartments": { "type": "array" },
+        "targetMode": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "customTargetPerDept": { "type": "integer" },
+        "totalStudents": { "type": "integer" },
+        "totalAllocated": { "type": "integer" },
+        "hallsRequired": { "type": "integer" },
+        "remainingAvailableCapacity": { "type": "integer" },
+        "hallSummaries": { "type": "array" },
+        "allocations": { "type": "array" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "examDate", "session", "selectedDepartments", "targetMode", "totalStudents", "totalAllocated", "hallsRequired", "hallSummaries", "allocations", "createdBy", "updatedBy"]
+    },
+    "OptimizationRun": {
+      "title": "OptimizationRun",
+      "description": "A GA optimization job log storing constraint configuration, solver telemetry, feasibility report, and reference to the resulting schedule.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "scheduleId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "scope": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "executionMode": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "status": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "bestFitness": { "type": "number" },
+        "convergedAtGeneration": { "type": "integer" },
+        "executionTimeMs": { "type": "number" },
+        "populationSize": { "type": "integer" },
+        "generations": { "type": "integer" },
+        "mutationRate": { "type": "number" },
+        "crossoverRate": { "type": "number" },
+        "constraintConfig": { "type": "object" },
+        "conflicts": { "type": "object" },
+        "constraintReport": { "type": "object" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "scheduleId", "scope", "executionMode", "status", "bestFitness", "convergedAtGeneration", "executionTimeMs", "populationSize", "generations", "mutationRate", "crossoverRate", "constraintConfig", "conflicts", "constraintReport", "createdBy", "updatedBy"]
+    },
+    "SystemState": {
+      "title": "SystemState",
+      "description": "System connection check and one-time seed initialization state.",
+      "type": "object",
+      "properties": {
+        "initialized": { "type": "boolean" },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["initialized", "updatedBy"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile document.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "role": { "type": "string", "enum": ["admin", "controller"] }
+      },
+      "required": ["uid", "email"]
+    },
+    "AdministratorAccount": {
+      "title": "AdministratorAccount",
+      "description": "Provisioned portal administrator account with role-based access level.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "role": { "type": "string", "enum": ["super_admin", "admin"] },
+        "status": { "type": "string", "enum": ["active", "suspended"] },
+        "firebaseUid": { "type": "string", "minLength": 0, "maxLength": 128 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "updatedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "name", "role", "status", "createdBy", "updatedBy"]
+    },
+    "SystemAuditLog": {
+      "title": "SystemAuditLog",
+      "description": "Immutable system management and security audit trail entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "category": { "type": "string", "enum": ["admin_access", "auth_security", "scheduling", "academic_data"] },
+        "action": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "outcome": { "type": "string", "enum": ["SUCCESS", "FAILED"] },
+        "actorEmail": { "type": "string", "minLength": 0, "maxLength": 160 },
+        "actorUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "actorRole": { "type": "string", "minLength": 0, "maxLength": 32 },
+        "targetType": { "type": "string", "minLength": 0, "maxLength": 64 },
+        "targetId": { "type": "string", "minLength": 0, "maxLength": 128 },
+        "targetLabel": { "type": "string", "minLength": 0, "maxLength": 200 },
+        "metadata": { "type": "object" },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "category", "action", "summary", "outcome", "actorUid", "createdBy"]
+    }
+  },
+  "firestore": {
+    "/departments/{deptId}": {
+      "schema": { "$ref": "#/entities/Department" },
+      "description": "Academic departments collection."
+    },
+    "/batches/{batchId}": {
+      "schema": { "$ref": "#/entities/Batch" },
+      "description": "Academic batches collection."
+    },
+    "/sections/{sectionId}": {
+      "schema": { "$ref": "#/entities/Section" },
+      "description": "Department sections collection."
+    },
+    "/subjects/{subjectId}": {
+      "schema": { "$ref": "#/entities/Subject" },
+      "description": "Exam subjects collection."
+    },
+    "/halls/{hallId}": {
+      "schema": { "$ref": "#/entities/Hall" },
+      "description": "Examination halls collection."
+    },
+    "/faculty/{facultyId}": {
+      "schema": { "$ref": "#/entities/Faculty" },
+      "description": "Invigilation faculty collection."
+    },
+    "/students/{studentId}": {
+      "schema": { "$ref": "#/entities/Student" },
+      "description": "Students collection."
+    },
+    "/subsections/{subsectionId}": {
+      "schema": { "$ref": "#/entities/SubsectionAllocation" },
+      "description": "Approved department subsection allocations."
+    },
+    "/schedules/{scheduleId}": {
+      "schema": { "$ref": "#/entities/Schedule" },
+      "description": "Saved GA schedules and run metrics."
+    },
+    "/timetables/{timetableId}": {
+      "schema": { "$ref": "#/entities/Timetable" },
+      "description": "Saved examination timetables."
+    },
+    "/conflictReports/{reportId}": {
+      "schema": { "$ref": "#/entities/ConflictReport" },
+      "description": "Saved schedule conflict reports."
+    },
+    "/hallAllocations/{allocationId}": {
+      "schema": { "$ref": "#/entities/HallAllocation" },
+      "description": "Confirmed session examination hall allocations."
+    },
+    "/optimizationRuns/{runId}": {
+      "schema": { "$ref": "#/entities/OptimizationRun" },
+      "description": "Genetic Algorithm optimization runs, constraint weights, and feasibility metrics."
+    },
+    "/system/{docId}": {
+      "schema": { "$ref": "#/entities/SystemState" },
+      "description": "System initialization and health check docs."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile docs isolated per user."
+    },
+    "/administrators/{adminId}": {
+      "schema": { "$ref": "#/entities/AdministratorAccount" },
+      "description": "Provisioned portal administrators and Super Administrators."
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/SystemAuditLog" },
+      "description": "Append-only system audit logs visible to Super Administrators."
+    }
+  }
+}

@@ -1,0 +1,644 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core helper primitives
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedAccount() {
+      return isSignedIn() && (
+        request.auth.token.email_verified == true ||
+        request.auth.token.firebase.sign_in_provider == 'password'
+      );
+    }
+
+    function isBootstrappedSuperAdmin() {
+      return isVerifiedAccount()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'naveen784546@gmail.com';
+    }
+
+    function isSuperAdmin() {
+      return isBootstrappedSuperAdmin() || (
+        isVerifiedAccount()
+        && exists(/databases/$(database)/documents/administrators/$(request.auth.uid))
+        && get(/databases/$(database)/documents/administrators/$(request.auth.uid)).data.role == 'super_admin'
+        && get(/databases/$(database)/documents/administrators/$(request.auth.uid)).data.status == 'active'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isStr(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isIntRange(val, minVal, maxVal) {
+      return val is int && val >= minVal && val <= maxVal;
+    }
+
+    function isNumRange(val, minVal, maxVal) {
+      return (val is int || val is float) && val >= minVal && val <= maxVal;
+    }
+
+    // Entity validation helpers
+    function isValidDepartment(data) {
+      return data.keys().hasAll(['id', 'name', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'name', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.name, 1, 160)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBatch(data) {
+      return data.keys().hasAll(['id', 'name', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'name', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.name, 1, 64)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSection(data) {
+      return data.keys().hasAll(['id', 'department', 'name', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'department', 'name', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.department, 1, 160)
+        && isStr(data.name, 1, 64)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSubject(data) {
+      return data.keys().hasAll(['id', 'code', 'name', 'department', 'batch', 'section', 'semester', 'enrolledCount', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'code', 'name', 'department', 'batch', 'section', 'semester', 'enrolledCount', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.code, 1, 32)
+        && isStr(data.name, 1, 200)
+        && isStr(data.department, 1, 160)
+        && isStr(data.batch, 1, 64)
+        && isStr(data.section, 1, 64)
+        && isIntRange(data.semester, 1, 12)
+        && isIntRange(data.enrolledCount, 1, 2000)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidHall(data) {
+      return data.keys().hasAll(['id', 'hallNumber', 'building', 'capacity', 'available', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'hallNumber', 'building', 'capacity', 'available', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.hallNumber, 1, 40)
+        && isStr(data.building, 1, 160)
+        && isIntRange(data.capacity, 1, 5000)
+        && data.available is bool
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidFaculty(data) {
+      return data.keys().hasAll(['id', 'employeeId', 'name', 'department', 'designation', 'email', 'phone', 'available', 'maxDuties', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'employeeId', 'name', 'department', 'designation', 'email', 'phone', 'available', 'maxDuties', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.employeeId, 1, 40)
+        && isStr(data.name, 1, 160)
+        && isStr(data.department, 1, 160)
+        && isStr(data.designation, 1, 120)
+        && isStr(data.email, 0, 160)
+        && isStr(data.phone, 0, 40)
+        && data.available is bool
+        && isIntRange(data.maxDuties, 1, 50)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidStudent(data) {
+      return data.keys().hasAll(['id', 'regNo', 'name', 'department', 'section', 'batch', 'semester', 'enrolledSubjectIds', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'regNo', 'name', 'department', 'section', 'batch', 'semester', 'enrolledSubjectIds', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.regNo, 1, 40)
+        && isStr(data.name, 1, 160)
+        && isStr(data.department, 1, 160)
+        && isStr(data.section, 1, 64)
+        && isStr(data.batch, 1, 64)
+        && isIntRange(data.semester, 1, 12)
+        && data.enrolledSubjectIds is list
+        && data.enrolledSubjectIds.size() <= 50
+        && (data.enrolledSubjectIds.size() == 0 || data.enrolledSubjectIds[0] is string)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSubsection(data) {
+      return data.keys().hasAll(['id', 'department', 'subsectionCount', 'totalStudents', 'assignments', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'department', 'subsectionCount', 'totalStudents', 'assignments', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.department, 1, 160)
+        && isIntRange(data.subsectionCount, 1, 26)
+        && isIntRange(data.totalStudents, 0, 10000)
+        && data.assignments is list
+        && data.assignments.size() <= 5000
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSchedule(data) {
+      return data.keys().hasAll(['id', 'schedule', 'bestFitness', 'history', 'conflicts', 'convergedAtGeneration', 'executionTimeMs', 'scope', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'schedule', 'bestFitness', 'history', 'conflicts', 'convergedAtGeneration', 'executionTimeMs', 'scope', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && data.schedule is list
+        && data.schedule.size() <= 1000
+        && isNumRange(data.bestFitness, -1000000, 1000000)
+        && data.history is list
+        && data.history.size() <= 500
+        && data.conflicts is map
+        && isIntRange(data.convergedAtGeneration, 0, 10000)
+        && isNumRange(data.executionTimeMs, 0, 600000)
+        && isStr(data.scope, 1, 32)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidTimetable(data) {
+      return data.keys().hasAll(['id', 'scheduleId', 'entries', 'scope', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'scheduleId', 'entries', 'scope', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.scheduleId, 1, 128)
+        && data.entries is list
+        && data.entries.size() <= 1000
+        && isStr(data.scope, 1, 32)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidConflictReport(data) {
+      return data.keys().hasAll(['id', 'scheduleId', 'studentClashes', 'invigilatorConflicts', 'capacityViolations', 'hallDoubleBookings', 'totalHardViolations', 'utilizationRate', 'workloadStdDev', 'flaggedItems', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'scheduleId', 'studentClashes', 'invigilatorConflicts', 'capacityViolations', 'hallDoubleBookings', 'totalHardViolations', 'utilizationRate', 'workloadStdDev', 'flaggedItems', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.scheduleId, 1, 128)
+        && isIntRange(data.studentClashes, 0, 10000)
+        && isIntRange(data.invigilatorConflicts, 0, 10000)
+        && isIntRange(data.capacityViolations, 0, 10000)
+        && isIntRange(data.hallDoubleBookings, 0, 10000)
+        && isIntRange(data.totalHardViolations, 0, 40000)
+        && isNumRange(data.utilizationRate, 0, 1000)
+        && isNumRange(data.workloadStdDev, 0, 1000)
+        && data.flaggedItems is list
+        && data.flaggedItems.size() <= 1000
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidHallAllocation(data) {
+      return data.keys().hasAll(['id', 'examDate', 'session', 'selectedDepartments', 'targetMode', 'customTargetPerDept', 'totalStudents', 'totalAllocated', 'hallsRequired', 'remainingAvailableCapacity', 'hallSummaries', 'allocations', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'examDate', 'session', 'selectedDepartments', 'targetMode', 'customTargetPerDept', 'totalStudents', 'totalAllocated', 'hallsRequired', 'remainingAvailableCapacity', 'hallSummaries', 'allocations', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.examDate, 1, 40)
+        && isStr(data.session, 1, 16)
+        && data.selectedDepartments is list
+        && data.selectedDepartments.size() <= 100
+        && (data.selectedDepartments.size() == 0 || data.selectedDepartments[0] is string)
+        && isStr(data.targetMode, 1, 32)
+        && isIntRange(data.customTargetPerDept, 0, 5000)
+        && isIntRange(data.totalStudents, 0, 20000)
+        && isIntRange(data.totalAllocated, 0, 20000)
+        && isIntRange(data.hallsRequired, 0, 500)
+        && isIntRange(data.remainingAvailableCapacity, 0, 100000)
+        && data.hallSummaries is list
+        && data.hallSummaries.size() <= 500
+        && data.allocations is list
+        && data.allocations.size() <= 5000
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidOptimizationRun(data) {
+      return data.keys().hasAll(['id', 'scheduleId', 'scope', 'executionMode', 'status', 'bestFitness', 'convergedAtGeneration', 'executionTimeMs', 'populationSize', 'generations', 'mutationRate', 'crossoverRate', 'constraintConfig', 'conflicts', 'constraintReport', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'scheduleId', 'scope', 'executionMode', 'status', 'bestFitness', 'convergedAtGeneration', 'executionTimeMs', 'populationSize', 'generations', 'mutationRate', 'crossoverRate', 'constraintConfig', 'conflicts', 'constraintReport', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.scheduleId, 1, 128)
+        && isStr(data.scope, 1, 32)
+        && isStr(data.executionMode, 1, 32)
+        && isStr(data.status, 1, 32)
+        && isNumRange(data.bestFitness, -1000000, 1000000)
+        && isIntRange(data.convergedAtGeneration, 0, 10000)
+        && isNumRange(data.executionTimeMs, 0, 600000)
+        && isIntRange(data.populationSize, 1, 1000)
+        && isIntRange(data.generations, 1, 10000)
+        && isNumRange(data.mutationRate, 0, 1)
+        && isNumRange(data.crossoverRate, 0, 1)
+        && data.constraintConfig is map
+        && data.conflicts is map
+        && data.constraintReport is map
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSystem(data) {
+      return data.keys().hasAll(['initialized', 'updatedBy', 'updatedAt'])
+        && data.keys().hasOnly(['initialized', 'updatedBy', 'updatedAt'])
+        && data.initialized is bool
+        && data.updatedBy == request.auth.uid
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email'])
+        && data.keys().hasOnly(['uid', 'email', 'role'])
+        && data.uid == request.auth.uid
+        && isStr(data.email, 1, 160);
+    }
+
+    function isValidAdministratorAccount(data) {
+      return data.keys().hasAll(['id', 'email', 'name', 'role', 'status', 'firebaseUid', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'email', 'name', 'role', 'status', 'firebaseUid', 'createdBy', 'updatedBy', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isStr(data.email, 3, 160)
+        && isStr(data.name, 1, 160)
+        && data.role in ['super_admin', 'admin']
+        && data.status in ['active', 'suspended']
+        && isStr(data.firebaseUid, 0, 128)
+        && isStr(data.createdBy, 1, 128)
+        && data.updatedBy == request.auth.uid
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSystemAuditLog(data) {
+      return data.keys().hasAll(['id', 'category', 'action', 'summary', 'outcome', 'actorEmail', 'actorUid', 'actorRole', 'targetType', 'targetId', 'targetLabel', 'metadata', 'createdBy', 'createdAt'])
+        && data.keys().hasOnly(['id', 'category', 'action', 'summary', 'outcome', 'actorEmail', 'actorUid', 'actorRole', 'targetType', 'targetId', 'targetLabel', 'metadata', 'createdBy', 'createdAt'])
+        && isValidId(data.id)
+        && data.category in ['admin_access', 'auth_security', 'scheduling', 'academic_data']
+        && isStr(data.action, 1, 80)
+        && isStr(data.summary, 1, 300)
+        && data.outcome in ['SUCCESS', 'FAILED']
+        && isStr(data.actorEmail, 0, 160)
+        && data.actorUid == request.auth.uid
+        && isStr(data.actorRole, 0, 32)
+        && isStr(data.targetType, 0, 64)
+        && isStr(data.targetId, 0, 128)
+        && isStr(data.targetLabel, 0, 200)
+        && data.metadata is map
+        && data.createdBy == request.auth.uid
+        && data.createdAt is timestamp;
+    }
+
+    // Departments
+    match /departments/{deptId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(deptId);
+      allow create: if isVerifiedAccount() && isValidId(deptId)
+        && isValidDepartment(incoming())
+        && incoming().id == deptId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(deptId)
+        && isValidDepartment(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(deptId);
+    }
+
+    // Batches
+    match /batches/{batchId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(batchId);
+      allow create: if isVerifiedAccount() && isValidId(batchId)
+        && isValidBatch(incoming())
+        && incoming().id == batchId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(batchId)
+        && isValidBatch(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(batchId);
+    }
+
+    // Sections
+    match /sections/{sectionId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(sectionId);
+      allow create: if isVerifiedAccount() && isValidId(sectionId)
+        && isValidSection(incoming())
+        && incoming().id == sectionId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(sectionId)
+        && isValidSection(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['department', 'name', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(sectionId);
+    }
+
+    // Subjects
+    match /subjects/{subjectId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(subjectId);
+      allow create: if isVerifiedAccount() && isValidId(subjectId)
+        && isValidSubject(incoming())
+        && incoming().id == subjectId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(subjectId)
+        && isValidSubject(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['code', 'name', 'department', 'batch', 'section', 'semester', 'enrolledCount', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(subjectId);
+    }
+
+    // Halls
+    match /halls/{hallId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(hallId);
+      allow create: if isVerifiedAccount() && isValidId(hallId)
+        && isValidHall(incoming())
+        && incoming().id == hallId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(hallId)
+        && isValidHall(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['hallNumber', 'building', 'capacity', 'available', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(hallId);
+    }
+
+    // Faculty
+    match /faculty/{facultyId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(facultyId);
+      allow create: if isVerifiedAccount() && isValidId(facultyId)
+        && isValidFaculty(incoming())
+        && incoming().id == facultyId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(facultyId)
+        && isValidFaculty(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['employeeId', 'name', 'department', 'designation', 'email', 'phone', 'available', 'maxDuties', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(facultyId);
+    }
+
+    // Students
+    match /students/{studentId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(studentId);
+      allow create: if isVerifiedAccount() && isValidId(studentId)
+        && isValidStudent(incoming())
+        && incoming().id == studentId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(studentId)
+        && isValidStudent(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['regNo', 'name', 'department', 'section', 'batch', 'semester', 'enrolledSubjectIds', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(studentId);
+    }
+
+    // Subsections
+    match /subsections/{subsectionId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(subsectionId);
+      allow create: if isVerifiedAccount() && isValidId(subsectionId)
+        && isValidSubsection(incoming())
+        && incoming().id == subsectionId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(subsectionId)
+        && isValidSubsection(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['department', 'subsectionCount', 'totalStudents', 'assignments', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(subsectionId);
+    }
+
+    // Schedules
+    match /schedules/{scheduleId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(scheduleId);
+      allow create: if isVerifiedAccount() && isValidId(scheduleId)
+        && isValidSchedule(incoming())
+        && incoming().id == scheduleId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(scheduleId)
+        && isValidSchedule(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['schedule', 'bestFitness', 'history', 'conflicts', 'convergedAtGeneration', 'executionTimeMs', 'scope', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(scheduleId);
+    }
+
+    // Timetables
+    match /timetables/{timetableId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(timetableId);
+      allow create: if isVerifiedAccount() && isValidId(timetableId)
+        && isValidTimetable(incoming())
+        && incoming().id == timetableId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(timetableId)
+        && isValidTimetable(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['scheduleId', 'entries', 'scope', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(timetableId);
+    }
+
+    // Conflict Reports
+    match /conflictReports/{reportId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(reportId);
+      allow create: if isVerifiedAccount() && isValidId(reportId)
+        && isValidConflictReport(incoming())
+        && incoming().id == reportId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(reportId)
+        && isValidConflictReport(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['scheduleId', 'studentClashes', 'invigilatorConflicts', 'capacityViolations', 'hallDoubleBookings', 'totalHardViolations', 'utilizationRate', 'workloadStdDev', 'flaggedItems', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(reportId);
+    }
+
+    // Hall Allocations
+    match /hallAllocations/{allocationId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(allocationId);
+      allow create: if isVerifiedAccount() && isValidId(allocationId)
+        && isValidHallAllocation(incoming())
+        && incoming().id == allocationId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(allocationId)
+        && isValidHallAllocation(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['examDate', 'session', 'selectedDepartments', 'targetMode', 'customTargetPerDept', 'totalStudents', 'totalAllocated', 'hallsRequired', 'remainingAvailableCapacity', 'hallSummaries', 'allocations', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(allocationId);
+    }
+
+    // Optimization Runs
+    match /optimizationRuns/{runId} {
+      allow list: if isVerifiedAccount();
+      allow get: if isVerifiedAccount() && isValidId(runId);
+      allow create: if isVerifiedAccount() && isValidId(runId)
+        && isValidOptimizationRun(incoming())
+        && incoming().id == runId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedAccount() && isValidId(runId)
+        && isValidOptimizationRun(incoming())
+        && incoming().id == existing().id
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['scheduleId', 'scope', 'executionMode', 'status', 'bestFitness', 'convergedAtGeneration', 'executionTimeMs', 'populationSize', 'generations', 'mutationRate', 'crossoverRate', 'constraintConfig', 'conflicts', 'constraintReport', 'updatedBy', 'updatedAt']);
+      allow delete: if isVerifiedAccount() && isValidId(runId);
+    }
+
+    // System bootstrap & connection state
+    match /system/{docId} {
+      allow get: if isVerifiedAccount() && isValidId(docId);
+      allow create, update: if isVerifiedAccount() && isValidId(docId)
+        && isValidSystem(incoming())
+        && incoming().updatedAt == request.time;
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow get: if isVerifiedAccount() && isValidId(userId) && request.auth.uid == userId;
+      allow create: if isVerifiedAccount() && isValidId(userId) && request.auth.uid == userId && isValidUser(incoming());
+      allow update: if isVerifiedAccount() && isValidId(userId) && request.auth.uid == userId && isValidUser(incoming()) && incoming().uid == existing().uid;
+    }
+
+    // Administrator Accounts (Super Admin managed)
+    match /administrators/{adminId} {
+      allow get: if isVerifiedAccount() && isValidId(adminId) && (adminId == request.auth.uid || isSuperAdmin());
+      allow list: if isBootstrappedSuperAdmin() || (
+        isVerifiedAccount() && (
+          resource.data.firebaseUid == request.auth.uid ||
+          resource.data.createdBy == request.auth.uid
+        )
+      );
+      allow create: if isVerifiedAccount() && isValidId(adminId)
+        && isValidAdministratorAccount(incoming())
+        && incoming().id == adminId
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (isSuperAdmin() || (adminId == request.auth.uid && incoming().role == 'admin' && incoming().status == 'active'));
+      allow update: if isVerifiedAccount() && isValidId(adminId)
+        && isValidAdministratorAccount(incoming())
+        && incoming().id == existing().id
+        && incoming().email == existing().email
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && isSuperAdmin()
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'role', 'status', 'firebaseUid', 'updatedBy', 'updatedAt']);
+      allow delete: if isSuperAdmin() && isValidId(adminId) && adminId != request.auth.uid;
+    }
+
+    // Immutable System Audit Logs (Super Admin readable)
+    match /auditLogs/{logId} {
+      allow get: if isVerifiedAccount() && isValidId(logId) && (isSuperAdmin() || resource.data.actorUid == request.auth.uid);
+      allow list: if isBootstrappedSuperAdmin() || (isVerifiedAccount() && resource.data.actorUid == request.auth.uid);
+      allow create: if isVerifiedAccount() && isValidId(logId)
+        && isValidSystemAuditLog(incoming())
+        && incoming().id == logId
+        && incoming().createdBy == request.auth.uid
+        && incoming().actorUid == request.auth.uid
+        && incoming().createdAt == request.time;
+    }
+  }
+}

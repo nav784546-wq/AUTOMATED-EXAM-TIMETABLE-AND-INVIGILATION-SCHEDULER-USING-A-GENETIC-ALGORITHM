@@ -1,0 +1,6 @@
+{
+  "name": "ExamGrid GA — Automated Exam Timetable & Invigilation Scheduler",
+  "description": "Administrator dashboard for automated conflict-free exam timetabling, hall capacity allocation, and faculty invigilation scheduling powered by a Genetic Algorithm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
