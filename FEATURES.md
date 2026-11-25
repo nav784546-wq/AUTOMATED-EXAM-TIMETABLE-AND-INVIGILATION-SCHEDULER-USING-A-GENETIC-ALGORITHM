@@ -1,6 +1,6 @@
 # Project Features Documentation
 
-**ExamGrid GA — Automated Exam Timetable & Invigilation Scheduler** is an administrator dashboard for generating conflict-free examination schedules, optimizing faculty invigilation duties, allocating examination hall seating, dividing student cohorts into subsections, and exporting publication-ready reports.
+**ExamGrid GA — Automated Exam Timetable & Invigilation Scheduler** is an administrator dashboard for generating conflict-free examination schedules, optimizing faculty invigilation duties, allocating examination hall seating, and exporting publication-ready reports.
 
 ---
 
@@ -93,21 +93,17 @@
 - Displays 6 violation KPI cards (student overlaps, hall double-bookings, capacity overflows, faculty double-bookings, faculty max-duty violations, and gap-policy violations).
 - Displays policy and parallel-department advisories, **Show Conflicts Only / Show All Exams** toggle, inline invigilator override selector, and **Save Conflict Report**.
 
-### 2.6 Subsection Division (`subsections`)
-- Select a Department and target `Subsections` count (1–10 → `A`, `B`, `C`, …).
-- Automatically sorts students alphabetically by registration number (preserving leading zeros), splits into balanced groups, flags duplicate/missing registration numbers, offers an **Approve & Rebalance** banner, and exports to **CSV** or **Print**.
-
-### 2.7 Master Data Modules (`departments`, `subjects`, `halls`, `faculty`, `entities`)
-- **Departments**: Add departments with initial sections, rename/delete departments (guarded against deleting the last department), and add/rename/delete sections with confirmation dialogs and **Undo** toast support.
+### 2.6 Master Data Modules (`departments`, `subjects`, `halls`, `faculty`, `entities`)
+- **Departments**: Add departments, rename/delete departments (guarded against deleting the last department) with confirmation dialogs and **Undo** toast support.
 - **Subjects**: Create, search, filter by department, inline edit (`Code`, `Name`, `Department`, `Semester`, `Enrolled`), and delete.
 - **Halls**: Create, search, filter by status, click-to-toggle `Available`/`Unavailable`, inline edit (`Hall Number`, `Building`, `Seating Capacity`), and delete while tracking total active seating capacity.
 - **Faculty**: Create, search, filter by department/status, click-to-toggle `Available`/`On Leave`, inline edit (`Employee ID`, `Full Name`, `Department`, `Email`, `Phone`, `Max Duties`), and delete.
 - **Manage Data (`EntityManagerView`)**: Unified 4-tab view (`Students & Batches`, `Examination Halls`, `Faculty`, `Subjects & Exams`) with cascading Department → Batch → Section filters, paginated student table, new student registration, inline student **Transfer** (update regNo, name, department, batch, or section), and batch/section management.
 
-### 2.8 Reports & Export (`reports`)
+### 2.7 Reports & Export (`reports`)
 - Consolidated searchable and filterable (`Department`, `Batch`, `Section`, `Date`) master timetable table showing Conflict/Verified status badges and one-click **Print / PDF**, **Export CSV**, and **Export to Excel (.xlsx)** actions.
 
-### 2.9 Administrator Management & Audit Logs (`admin-management`)
+### 2.8 Administrator Management & Audit Logs (`admin-management`)
 - **Administrator Account Controls (Super Admin only)**:
   - **Add Administrator** form (`Full Name`, `University Email`, `Access Role`: `admin` or `super_admin`).
   - Toggle role (**Make Super Admin** / **Set Admin**), toggle account status (**Suspend** / **Activate**), or **Remove** administrator (self-modification blocked for safety).

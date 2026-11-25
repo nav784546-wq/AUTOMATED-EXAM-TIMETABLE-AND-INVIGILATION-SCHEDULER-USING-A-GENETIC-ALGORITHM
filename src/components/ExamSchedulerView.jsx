@@ -18,6 +18,7 @@ import {
 import { downloadTimetableCSV } from '../utils/exportReport.js';
 import { exportDepartmentTimetableToExcel } from '../utils/excelTimetableExport.js';
 import { SingleDaySubjectSelector } from './SingleDaySubjectSelector.jsx';
+import { PrintableTimetableView } from './PrintableTimetableView.jsx';
 import { PaginationBar } from './PaginationBar.jsx';
 import {
   formatDisplayDate,
@@ -65,7 +66,7 @@ export const ExamSchedulerView = ({
   const [filterSection, setFilterSection] = useState('ALL');
   const [filterSubject, setFilterSubject] = useState('ALL');
   const [filterDate, setFilterDate] = useState('ALL');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'department' | 'single-day'
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'department' | 'single-day' | 'print'
 
   const [editingExamId, setEditingExamId] = useState(null);
   const [editValues, setEditValues] = useState({
@@ -563,17 +564,32 @@ export const ExamSchedulerView = ({
                 <BookOpen className="w-3.5 h-3.5" />
                 Single-Day Selection
               </button>
+              <button
+                type="button"
+                data-testid="view-mode-print-btn"
+                onClick={() => setViewMode('print')}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap ${
+                  viewMode === 'print'
+                    ? 'bg-white text-blue-700 shadow-sm font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Print View
+              </button>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer whitespace-nowrap"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                Print / PDF
-              </button>
+              {viewMode !== 'print' && (
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 cursor-pointer whitespace-nowrap"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Print / PDF
+                </button>
+              )}
 
               <div className="relative" ref={exportMenuRef}>
                 <div className="inline-flex items-stretch rounded-lg overflow-hidden border border-blue-800 shadow-xs">
@@ -790,9 +806,27 @@ export const ExamSchedulerView = ({
         />
       )}
 
+      {/* PRINT-FRIENDLY VIEW */}
+      {viewMode === 'print' && (
+        <PrintableTimetableView
+          schedule={filteredSchedule}
+          allScheduleCount={schedule.length}
+          departmentFilter={filterDept}
+          batchFilter={filterBatch}
+          timetableConfirmed={timetableConfirmed}
+          onClearFilters={() => {
+            setFilterDept('ALL');
+            setFilterBatch('ALL');
+            setFilterSection('ALL');
+            setFilterSubject('ALL');
+            setFilterDate('ALL');
+          }}
+        />
+      )}
+
       {/* DEPARTMENT-WISE VIEW */}
       {viewMode === 'department' && (
-        <div className="space-y-6" data-testid="department-wise-schedule-view">
+        <div className="space-y-6 no-print" data-testid="department-wise-schedule-view">
           {departmentGrouped.map(([dept, items]) => {
             const deptHasViolation = items.some(
               (item) =>
@@ -1091,7 +1125,7 @@ export const ExamSchedulerView = ({
 
       {/* VISUAL DATE GRID VIEW */}
       {viewMode === 'grid' && (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm no-print">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -1366,6 +1400,17 @@ export const ExamSchedulerView = ({
             />
           )}
         </div>
+      )}
+
+      {viewMode !== 'print' && (
+        <PrintableTimetableView
+          compactPrintOnly
+          schedule={filteredSchedule}
+          allScheduleCount={schedule.length}
+          departmentFilter={filterDept}
+          batchFilter={filterBatch}
+          timetableConfirmed={timetableConfirmed}
+        />
       )}
     </div>
   );

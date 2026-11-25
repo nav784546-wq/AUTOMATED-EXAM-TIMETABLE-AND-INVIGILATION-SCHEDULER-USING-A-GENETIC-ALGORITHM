@@ -488,12 +488,12 @@ export const GASchedulerView = ({
           />
         </div>
 
-        <div className="lg:col-span-7 min-w-0 bg-white border border-slate-200 rounded-xl p-4 sm:p-6 flex flex-col justify-between">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="lg:col-span-7 min-w-0 bg-white border border-slate-200 rounded-xl p-4 sm:p-6 flex flex-col justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 className="text-base font-semibold text-slate-900">Fitness Convergence</h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Best vs. population average fitness across {config.generations} generations
+                Best vs. population average fitness across {history.length || config.generations} / {config.generations} generations
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs text-slate-600">
@@ -536,6 +536,40 @@ export const GASchedulerView = ({
                 Gen {history.length}
               </text>
             </svg>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100 text-xs">
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg px-3 py-2">
+              <div className="text-[11px] text-slate-500">Peak Fitness</div>
+              <div className="font-mono font-semibold text-slate-900 tabular-nums mt-0.5">
+                {Number(gaResult.bestFitness || 0).toFixed(1)}
+              </div>
+            </div>
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg px-3 py-2">
+              <div className="text-[11px] text-slate-500">Converged Gen</div>
+              <div className="font-mono font-semibold text-slate-900 tabular-nums mt-0.5">
+                {gaResult.convergedAtGeneration || 0} / {history.length || config.generations}
+              </div>
+            </div>
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg px-3 py-2">
+              <div className="text-[11px] text-slate-500">Hard Conflicts</div>
+              <div
+                className={`font-mono font-semibold tabular-nums mt-0.5 ${
+                  (gaResult.conflicts?.totalHardViolations ?? 0) === 0
+                    ? 'text-emerald-700'
+                    : 'text-red-700'
+                }`}
+              >
+                {gaResult.conflicts?.totalHardViolations ?? 0}
+              </div>
+            </div>
+            <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg px-3 py-2">
+              <div className="text-[11px] text-slate-500">Active Tuning</div>
+              <div className="font-mono font-semibold text-blue-700 tabular-nums mt-0.5 truncate">
+                P{config.populationSize || 40} · G{config.generations || 50} ·{' '}
+                {Math.round((Number(config.mutationRate) || 0.12) * 100)}%
+              </div>
+            </div>
           </div>
         </div>
       </div>

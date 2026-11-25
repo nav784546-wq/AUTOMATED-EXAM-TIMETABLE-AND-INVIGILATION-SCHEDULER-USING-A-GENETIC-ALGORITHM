@@ -37,7 +37,6 @@ import { FacultyManagementView } from './components/FacultyManagementView.jsx';
 import { ExamSchedulerView } from './components/ExamSchedulerView.jsx';
 import { SeatingArrangementView } from './components/SeatingArrangementView.jsx';
 import { ConflictReportView } from './components/ConflictReportView.jsx';
-import { SubsectionDivisionView } from './components/SubsectionDivisionView.jsx';
 import { ReportsExportView } from './components/ReportsExportView.jsx';
 import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
@@ -56,8 +55,7 @@ const PAGE_TITLES = {
   'exam-scheduler': 'Visual Exam Scheduler',
   seating: 'Hall Seating Arrangement',
   conflicts: 'Conflict Report & Overrides',
-  subsections: 'Department-Wise Subsection Division',
-  departments: 'Department & Section Management',
+  departments: 'Department Management',
   subjects: 'Subject Management',
   halls: 'Examination Hall Management',
   faculty: 'Faculty & Invigilator Management',
@@ -124,8 +122,6 @@ export default function App() {
     halls,
     faculty,
     students,
-    setStudents,
-    subsectionRecords,
     hallAllocations,
     exams,
     setEntitiesFromHydration,
@@ -135,9 +131,6 @@ export default function App() {
     handleAddBatch,
     handleEditBatch,
     handleDeleteBatch,
-    handleAddSection,
-    handleRenameSection,
-    handleDeleteSection,
     handleAddSubject,
     handleUpdateSubject,
     handleDeleteSubject,
@@ -152,7 +145,6 @@ export default function App() {
     handleAddStudent,
     handleUpdateStudent,
     handleDeleteStudent,
-    handleApproveSubsectionDivision,
     handleSaveHallAllocation,
     handleDeleteHallAllocation,
   } = useExamEntities({
@@ -290,7 +282,6 @@ export default function App() {
       { id: 'exam-scheduler', label: 'Exam Scheduler', icon: <CalendarDays className="w-4 h-4" /> },
       { id: 'seating', label: 'Seating Plan', icon: <Grid3X3 className="w-4 h-4" /> },
       { id: 'conflicts', label: 'Conflict Report', icon: <AlertTriangle className="w-4 h-4" /> },
-      { id: 'subsections', label: 'Subsection Division', icon: <Users className="w-4 h-4" /> },
       { id: 'departments', label: 'Departments', icon: <Building2 className="w-4 h-4" /> },
       { id: 'subjects', label: 'Subjects', icon: <BookOpen className="w-4 h-4" /> },
       { id: 'halls', label: 'Halls', icon: <DoorOpen className="w-4 h-4" /> },
@@ -628,16 +619,6 @@ export default function App() {
                   />
                 )}
 
-                {activeTab === 'subsections' && (
-                  <SubsectionDivisionView
-                    students={students}
-                    departments={departments}
-                    subsectionRecords={subsectionRecords}
-                    onApproveSubsection={handleApproveSubsectionDivision}
-                    onUpdateStudents={setStudents}
-                  />
-                )}
-
                 {activeTab === 'conflicts' && (
                   <ConflictReportView
                     gaResult={gaResult}
@@ -651,16 +632,12 @@ export default function App() {
                 {activeTab === 'departments' && (
                   <DepartmentManagementView
                     departments={departments}
-                    sectionsByDept={sectionsByDept}
                     students={students}
                     faculty={faculty}
                     subjects={subjects}
                     onAddDepartment={handleAddDepartment}
                     onRenameDepartment={handleRenameDepartment}
                     onDeleteDepartment={handleDeleteDepartment}
-                    onAddSection={handleAddSection}
-                    onRenameSection={handleRenameSection}
-                    onDeleteSection={handleDeleteSection}
                   />
                 )}
 
@@ -710,8 +687,6 @@ export default function App() {
                     onAddBatch={handleAddBatch}
                     onEditBatch={handleEditBatch}
                     onDeleteBatch={handleDeleteBatch}
-                    onAddSection={handleAddSection}
-                    onDeleteSection={handleDeleteSection}
                     onAddSubject={handleAddSubject}
                     onDeleteSubject={handleDeleteSubject}
                     onAddHall={handleAddHall}

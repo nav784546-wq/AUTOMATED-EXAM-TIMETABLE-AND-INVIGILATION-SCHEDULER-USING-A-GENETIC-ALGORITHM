@@ -28,20 +28,19 @@ Welcome to **ExamGrid GA — Automated Exam Timetable & Invigilation Scheduler**
 
 ## 2. Understanding the Dashboard Layout
 
-- **Left Sidebar**: Lists all 13 workspace modules organized by workflow:
+- **Left Sidebar**: Lists all 12 workspace modules organized by workflow:
   1. **Overview** — Health metrics, charts, and the Student Cohort Conflict Heatmap.
   2. **GA Scheduler** — Automated Genetic Algorithm timetable generator.
   3. **Visual Exam Scheduler** — Department/grid timetable editor and structured Excel export.
   4. **Hall Seating** — Room capacity allocation, student seat lookup, and visual seat maps.
   5. **Conflict Report** — Detailed clash breakdown and invigilator override controls.
-  6. **Subsections** — Automatic alphabetical division of students into subsections (`A`, `B`, `C`...).
-  7. **Departments** — Manage academic departments and class sections.
-  8. **Subjects** — Manage exam courses, semester tags, and enrollment counts.
-  9. **Halls** — Manage classrooms/halls, seating capacities, and availability.
-  10. **Faculty** — Manage invigilators, duty caps, and leave status.
-  11. **Manage Data** — Unified console for Students, Batches, Halls, Faculty, and Subjects.
-  12. **Reports & Export** — Searchable master export hub.
-  13. **Admin Management** — Manage administrator accounts and view System Audit Logs (Super Admin only).
+  6. **Departments** — Manage academic departments and class sections.
+  7. **Subjects** — Manage exam courses, semester tags, and enrollment counts.
+  8. **Halls** — Manage classrooms/halls, seating capacities, and availability.
+  9. **Faculty** — Manage invigilators, duty caps, and leave status.
+  10. **Manage Data** — Unified console for Students, Batches, Halls, Faculty, and Subjects.
+  11. **Reports & Export** — Searchable master export hub.
+  12. **Admin Management** — Manage administrator accounts and view System Audit Logs (Super Admin only).
 - **Top Header & Notifications**: Displays your signed-in role badge (`Super Administrator` or `Administrator`), **Sign Out** button, and temporary **Undo** banners when you delete or modify items.
 
 ---
@@ -52,8 +51,8 @@ Before generating a timetable, ensure your academic data is up to date.
 
 ### Adding, Editing, and Deleting Records
 1. **Departments (`Departments` tab)**:
-   - Enter a department name and initial sections (e.g., `A, B`), then click **Add Department**.
-   - Use the edit (pencil) icon to rename a department or section, or the trash icon to remove one (requires confirmation in the popup dialog).
+   - Enter a department name and click **Add Department**.
+   - Use the edit (pencil) icon to rename a department, or the trash icon to remove one (requires confirmation in the popup dialog).
 2. **Subjects (`Subjects` tab)**:
    - Enter **Subject Code**, **Subject Name**, **Department**, **Semester**, and **Enrolled** student count, then click **Add Subject**.
    - Use the search bar or department dropdown to locate a subject, click **Edit** to update enrollment or semester, or click **Delete**.
@@ -67,9 +66,6 @@ Before generating a timetable, ensure your academic data is up to date.
    - Use the **Department → Batch → Section** filters or the search box to find students.
    - To add a student, fill in **Registration Number**, **Full Name**, **Department**, **Batch**, and **Section**, then click **Register Student**.
    - To move a student to another section or batch, click **Transfer** on their row, change the fields inline, and click **Save**.
-6. **Subsections (`Subsections` tab)**:
-   - Pick a **Department** and set the number of **Subsections** (e.g., `3` creates `A`, `B`, and `C`).
-   - Students are sorted alphabetically by registration number and split evenly. Review any duplicate/missing ID warnings, click **Approve & Rebalance** if needed, and export via **Export CSV** or **Print**.
 
 > **Tip:** Whenever you delete an item, a toast banner appears at the bottom with an **Undo** button in case you change your mind.
 

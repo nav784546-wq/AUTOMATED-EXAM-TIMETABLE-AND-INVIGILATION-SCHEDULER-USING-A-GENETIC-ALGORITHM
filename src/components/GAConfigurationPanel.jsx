@@ -149,8 +149,8 @@ export function GAConfigurationPanel({
     >
       {/* Header + Presets */}
       <div className="space-y-3 border-b border-slate-100 pb-4">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <h2 id="ga-config-heading" className="text-base font-semibold text-slate-900">
               Genetic Algorithm Configuration
             </h2>
@@ -201,9 +201,12 @@ export function GAConfigurationPanel({
         <div>
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <label htmlFor="ga-pop-input" className="text-xs font-medium text-slate-700">
-              Population Size
+              Population Size{' '}
+              <span className="font-normal text-[11px] text-slate-400">
+                ({GA_PARAM_SPECS.populationSize.min}–{GA_PARAM_SPECS.populationSize.max})
+              </span>
             </label>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               <input
                 id="ga-pop-input"
                 data-testid="ga-pop-input"
@@ -221,7 +224,7 @@ export function GAConfigurationPanel({
                     : 'border-slate-300 bg-white text-slate-900'
                 }`}
               />
-              <span className="text-[11px] text-slate-500 whitespace-nowrap">chroms</span>
+              <span className="text-[11px] text-slate-500 w-12 whitespace-nowrap">chroms</span>
             </div>
           </div>
           <input
@@ -246,9 +249,12 @@ export function GAConfigurationPanel({
         <div>
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <label htmlFor="ga-gen-input" className="text-xs font-medium text-slate-700">
-              Maximum Generations
+              Maximum Generations{' '}
+              <span className="font-normal text-[11px] text-slate-400">
+                ({GA_PARAM_SPECS.generations.min}–{GA_PARAM_SPECS.generations.max})
+              </span>
             </label>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               <input
                 id="ga-gen-input"
                 data-testid="ga-gen-input"
@@ -266,7 +272,7 @@ export function GAConfigurationPanel({
                     : 'border-slate-300 bg-white text-slate-900'
                 }`}
               />
-              <span className="text-[11px] text-slate-500 whitespace-nowrap">gens</span>
+              <span className="text-[11px] text-slate-500 w-12 whitespace-nowrap">gens</span>
             </div>
           </div>
           <input
@@ -291,9 +297,12 @@ export function GAConfigurationPanel({
         <div>
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <label htmlFor="ga-mut-input" className="text-xs font-medium text-slate-700">
-              Mutation Rate
+              Mutation Rate{' '}
+              <span className="font-normal text-[11px] text-slate-400">
+                ({GA_PARAM_SPECS.mutationRate.minPercent}%–{GA_PARAM_SPECS.mutationRate.maxPercent}%)
+              </span>
             </label>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               <input
                 id="ga-mut-input"
                 data-testid="ga-mut-input"
@@ -311,7 +320,7 @@ export function GAConfigurationPanel({
                     : 'border-slate-300 bg-white text-slate-900'
                 }`}
               />
-              <span className="text-[11px] text-slate-500 w-9">%</span>
+              <span className="text-[11px] text-slate-500 w-12 whitespace-nowrap">%</span>
             </div>
           </div>
           <input
@@ -336,9 +345,12 @@ export function GAConfigurationPanel({
         <div>
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <label htmlFor="ga-cross-input" className="text-xs font-medium text-slate-700">
-              Crossover Rate
+              Crossover Rate{' '}
+              <span className="font-normal text-[11px] text-slate-400">
+                ({GA_PARAM_SPECS.crossoverRate.minPercent}%–{GA_PARAM_SPECS.crossoverRate.maxPercent}%)
+              </span>
             </label>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               <input
                 id="ga-cross-input"
                 data-testid="ga-cross-input"
@@ -356,7 +368,7 @@ export function GAConfigurationPanel({
                     : 'border-slate-300 bg-white text-slate-900'
                 }`}
               />
-              <span className="text-[11px] text-slate-500 w-9">%</span>
+              <span className="text-[11px] text-slate-500 w-12 whitespace-nowrap">%</span>
             </div>
           </div>
           <input

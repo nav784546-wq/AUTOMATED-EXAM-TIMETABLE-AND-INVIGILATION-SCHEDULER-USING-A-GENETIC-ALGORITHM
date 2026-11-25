@@ -16,8 +16,6 @@ export const EntityManagerView = ({
   onAddBatch,
   onEditBatch,
   onDeleteBatch,
-  onAddSection,
-  onDeleteSection,
   onAddSubject,
   onDeleteSubject,
   onAddHall,
@@ -35,7 +33,6 @@ export const EntityManagerView = ({
   // Student multi-level filters: Department -> Academic Batch -> Section + Search + Pagination
   const [filterDept, setFilterDept] = useState('ALL');
   const [filterBatch, setFilterBatch] = useState('ALL');
-  const [filterSection, setFilterSection] = useState('ALL');
   const [studentSearch, setStudentSearch] = useState('');
   const [studentPage, setStudentPage] = useState(1);
   const [studentPageSize, setStudentPageSize] = useState(25);
@@ -48,8 +45,6 @@ export const EntityManagerView = ({
   const [newBatchInput, setNewBatchInput] = useState('');
   const [editingBatch, setEditingBatch] = useState(null);
   const [renameBatchValue, setRenameBatchValue] = useState('');
-  const [newSectionInput, setNewSectionInput] = useState('');
-  const [newSectionDept, setNewSectionDept] = useState(departments[0] || 'BCA (AI & DS)');
 
   // Transfer / Edit student state
   const [editingStudentId, setEditingStudentId] = useState(null);
@@ -84,22 +79,17 @@ export const EntityManagerView = ({
   const [stuReg, setStuReg] = useState('');
   const [stuName, setStuName] = useState('');
   const [stuDept, setStuDept] = useState(departments[0] || 'BCA (AI & DS)');
-  const [stuSection, setStuSection] = useState(
-    (sectionsByDept[departments[0] || 'BCA (AI & DS)'] || ['Section A'])[0]
-  );
   const [stuBatch, setStuBatch] = useState(batches[batches.length - 1] || '2025');
 
   React.useEffect(() => {
     if (departments.length > 0) {
-      if (!departments.includes(newSectionDept)) setNewSectionDept(departments[0]);
       if (!departments.includes(subDept)) setSubDept(departments[0]);
       if (!departments.includes(facDept)) setFacDept(departments[0]);
       if (!departments.includes(stuDept)) {
         setStuDept(departments[0]);
-        setStuSection((sectionsByDept[departments[0]] || ['Section A'])[0]);
       }
     }
-  }, [departments, newSectionDept, subDept, facDept, stuDept, sectionsByDept]);
+  }, [departments, subDept, facDept, stuDept]);
 
   React.useEffect(() => {
     if (batches.length > 0 && !batches.includes(stuBatch)) {
@@ -107,19 +97,11 @@ export const EntityManagerView = ({
     }
   }, [batches, stuBatch]);
 
-  const availableFilterSections = useMemo(() => {
-    if (filterDept === 'ALL') {
-      return Array.from(new Set(Object.values(sectionsByDept).flat()));
-    }
-    return sectionsByDept[filterDept] || ['Section A'];
-  }, [filterDept, sectionsByDept]);
-
   const filteredStudents = useMemo(() => {
     const q = studentSearch.trim().toLowerCase();
     return students.filter((s) => {
       if (filterDept !== 'ALL' && s.department !== filterDept) return false;
       if (filterBatch !== 'ALL' && s.batch !== filterBatch) return false;
-      if (filterSection !== 'ALL' && s.section !== filterSection) return false;
       if (!q) return true;
       return (
         String(s.regNo || '').toLowerCase().includes(q) ||
@@ -128,11 +110,11 @@ export const EntityManagerView = ({
         String(s.section || '').toLowerCase().includes(q)
       );
     });
-  }, [students, filterDept, filterBatch, filterSection, studentSearch]);
+  }, [students, filterDept, filterBatch, studentSearch]);
 
   useEffect(() => {
     setStudentPage(1);
-  }, [filterDept, filterBatch, filterSection, studentSearch]);
+  }, [filterDept, filterBatch, studentSearch]);
 
   const paginatedStudents = useMemo(() => {
     const start = (studentPage - 1) * studentPageSize;
@@ -193,7 +175,7 @@ export const EntityManagerView = ({
       regNo: stuReg.trim().toUpperCase(),
       name: stuName.trim(),
       department: stuDept,
-      section: stuSection,
+      section: (sectionsByDept[stuDept] || ['Section A'])[0] || 'Section A',
       batch: stuBatch,
       semester: 1,
       enrolledSubjectIds: subjects.slice(0, 1).map((s) => s.id),
@@ -311,51 +293,9 @@ export const EntityManagerView = ({
                   </button>
                 </div>
               </div>
-
-              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
-
-              <div>
-                <label htmlFor="new-sec-dept" className="block text-xs font-medium text-slate-600 mb-1">
-                  Add Section to Department
-                </label>
-                <div className="flex items-center gap-2">
-                  <select
-                    id="new-sec-dept"
-                    value={newSectionDept}
-                    onChange={(e) => setNewSectionDept(e.target.value)}
-                    className="px-2.5 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
-                  >
-                    {departments.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    value={newSectionInput}
-                    onChange={(e) => setNewSectionInput(e.target.value)}
-                    placeholder="e.g. Section C"
-                    aria-label="New section name"
-                    className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white w-28"
-                  />
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (newSectionInput.trim()) {
-                        const ok = await onAddSection(newSectionDept, newSectionInput.trim());
-                        if (ok !== false) setNewSectionInput('');
-                      }
-                    }}
-                    className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg cursor-pointer whitespace-nowrap"
-                  >
-                    + Add Section
-                  </button>
-                </div>
-              </div>
             </div>
 
-            {/* Department & Section Directory */}
+            {/* Department Directory */}
             <div className="pt-3 border-t border-slate-100 flex flex-wrap gap-2">
               {departments.map((dept) => (
                 <div key={dept} className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs">
@@ -384,7 +324,6 @@ export const EntityManagerView = ({
                   ) : (
                     <>
                       <span className="font-medium text-slate-800">{dept}</span>
-                      <span className="text-slate-400">({(sectionsByDept[dept] || []).length} sec)</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -495,7 +434,6 @@ export const EntityManagerView = ({
                   onChange={(e) => {
                     setFilterDept(e.target.value);
                     setFilterBatch('ALL');
-                    setFilterSection('ALL');
                   }}
                   aria-label="Filter students by department"
                   className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
@@ -512,7 +450,6 @@ export const EntityManagerView = ({
                   value={filterBatch}
                   onChange={(e) => {
                     setFilterBatch(e.target.value);
-                    setFilterSection('ALL');
                   }}
                   aria-label="Filter students by batch"
                   className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
@@ -521,20 +458,6 @@ export const EntityManagerView = ({
                   {batches.map((b) => (
                     <option key={b} value={b}>
                       Batch {b}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filterSection}
-                  onChange={(e) => setFilterSection(e.target.value)}
-                  aria-label="Filter students by section"
-                  className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
-                >
-                  <option value="ALL">3. All Sections</option>
-                  {availableFilterSections.map((sec) => (
-                    <option key={sec} value={sec}>
-                      {sec}
                     </option>
                   ))}
                 </select>
@@ -574,30 +497,13 @@ export const EntityManagerView = ({
                   id="stu-dept"
                   value={stuDept}
                   onChange={(e) => {
-                    const nextDept = e.target.value;
-                    setStuDept(nextDept);
-                    setStuSection((sectionsByDept[nextDept] || ['Section A'])[0]);
+                    setStuDept(e.target.value);
                   }}
                   className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
                 >
                   {departments.map((d) => (
                     <option key={d} value={d}>
                       {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="stu-sec" className="block text-xs font-medium text-slate-600 mb-1">Section</label>
-                <select
-                  id="stu-sec"
-                  value={stuSection}
-                  onChange={(e) => setStuSection(e.target.value)}
-                  className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
-                >
-                  {(sectionsByDept[stuDept] || ['Section A']).map((sec) => (
-                    <option key={sec} value={sec}>
-                      {sec}
                     </option>
                   ))}
                 </select>

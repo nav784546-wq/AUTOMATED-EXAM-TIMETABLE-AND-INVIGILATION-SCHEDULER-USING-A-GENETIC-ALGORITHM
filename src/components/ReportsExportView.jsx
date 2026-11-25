@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Download, FileSpreadsheet, Printer, Search } from 'lucide-react';
+import { Download, FileDown, FileSpreadsheet, Printer, Search, Table2 } from 'lucide-react';
 import { downloadTimetableCSV } from '../utils/exportReport.js';
 import {
   exportDepartmentTimetableToExcel,
   formatExcelDateDDMMYYYY,
 } from '../utils/excelTimetableExport.js';
+import { downloadTimetablePDF } from '../utils/timetablePrintPdf.js';
 import { getSessionBadgeClasses } from '../utils/sessionStyles.js';
+import { PrintableTimetableView } from './PrintableTimetableView.jsx';
 
 export const ReportsExportView = ({ gaResult }) => {
   const [search, setSearch] = useState('');
@@ -13,6 +15,7 @@ export const ReportsExportView = ({ gaResult }) => {
   const [batchFilter, setBatchFilter] = useState('ALL');
   const [sectionFilter, setSectionFilter] = useState('ALL');
   const [dateFilter, setDateFilter] = useState('ALL');
+  const [viewMode, setViewMode] = useState('table'); // 'table' | 'print'
   const [exportFeedback, setExportFeedback] = useState(null);
 
   const schedule = gaResult.schedule || [];
@@ -129,14 +132,76 @@ export const ReportsExportView = ({ gaResult }) => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            Print / PDF
-          </button>
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+            <button
+              type="button"
+              data-testid="reports-view-table-btn"
+              onClick={() => setViewMode('table')}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer whitespace-nowrap ${
+                viewMode === 'table'
+                  ? 'bg-white text-blue-700 shadow-xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Table2 className="w-3.5 h-3.5" />
+              Table View
+            </button>
+            <button
+              type="button"
+              data-testid="reports-view-print-btn"
+              onClick={() => setViewMode('print')}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer whitespace-nowrap ${
+                viewMode === 'print'
+                  ? 'bg-white text-blue-700 shadow-xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Print Preview
+            </button>
+          </div>
+          {viewMode !== 'print' && (
+            <>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Print / PDF
+              </button>
+              <button
+                type="button"
+                data-testid="reports-export-pdf-btn"
+                disabled={filteredRows.length === 0}
+                onClick={() => {
+                  setExportFeedback(null);
+                  try {
+                    const res = downloadTimetablePDF(filteredRows, {
+                      layoutMode: 'department',
+                      includeVenueAndInvigilator: true,
+                      orientation: 'landscape',
+                      departmentFilter: deptFilter,
+                      academicBatch: batchFilter !== 'ALL' ? batchFilter : undefined,
+                    });
+                    setExportFeedback({
+                      type: 'success',
+                      message: `Downloaded ${res.filename} (${res.rowCount} examinations).`,
+                    });
+                  } catch (err) {
+                    setExportFeedback({
+                      type: 'error',
+                      message: err instanceof Error ? err.message : 'PDF export failed.',
+                    });
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                Download PDF
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => downloadTimetableCSV(filteredRows, 'examgrid_full_timetable.csv')}
@@ -182,6 +247,8 @@ export const ReportsExportView = ({ gaResult }) => {
             className={`w-full rounded-lg border px-3 py-2 text-xs ${
               exportFeedback.type === 'error'
                 ? 'border-red-200 bg-red-50 text-red-800'
+                : exportFeedback.type === 'success'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
                 : 'border-amber-200 bg-amber-50 text-amber-900'
             }`}
           >
@@ -190,7 +257,23 @@ export const ReportsExportView = ({ gaResult }) => {
         )}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      {viewMode === 'print' ? (
+        <PrintableTimetableView
+          schedule={filteredRows}
+          allScheduleCount={schedule.length}
+          departmentFilter={deptFilter}
+          batchFilter={batchFilter}
+          onClearFilters={() => {
+            setSearch('');
+            setDeptFilter('ALL');
+            setBatchFilter('ALL');
+            setSectionFilter('ALL');
+            setDateFilter('ALL');
+          }}
+        />
+      ) : (
+        <>
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm no-print">
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold text-slate-900">
@@ -271,6 +354,16 @@ export const ReportsExportView = ({ gaResult }) => {
           </table>
         </div>
       </div>
+
+      <PrintableTimetableView
+        compactPrintOnly
+        schedule={filteredRows}
+        allScheduleCount={schedule.length}
+        departmentFilter={deptFilter}
+        batchFilter={batchFilter}
+      />
+        </>
+      )}
     </div>
   );
 };

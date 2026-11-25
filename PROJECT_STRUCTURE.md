@@ -41,7 +41,7 @@ This document describes the folder hierarchy, entry points, source modules, conf
 |---|---|
 | `index.html` | HTML5 shell loading `/src/main.jsx` into `<div id="root">`. |
 | `src/main.jsx` | Frontend React entry point; wraps `App` inside `BrowserRouter` and `AuthProvider`. |
-| `src/App.jsx` | Main router (`/`, `/reset-password`), `?autostart=1` handling, 13-tab sidebar layout, Undo/Confirm integration, and active view switching. |
+| `src/App.jsx` | Main router (`/`, `/reset-password`), `?autostart=1` handling, 12-tab sidebar layout, Undo/Confirm integration, and active view switching. |
 | `server.ts` | Primary server entry point (`npm run dev` / `npm start`). Starts Express on port `3000`, mounts Vite dev middleware (or static `dist/` in production), handles `POST /api/ga/optimize` via Node `worker_threads`, spawns `python3 backend/server.py`, and proxies `/api/*` requests to port `5000`. |
 | `backend/server.py` | Zero-dependency Python HTTP API server (port `5000`) serving CRUD endpoints, hall allocation, subsection division, password reset tokens, admin management, and system audit logs backed by SQLite. |
 | `backend/main.py` | Optional FastAPI ASGI entry point mirroring backend routes (for use with `uvicorn` and `backend/requirements.txt`). |
@@ -70,9 +70,8 @@ Core UI views and reusable widgets:
   - `SingleDaySubjectSelector.jsx`: Department radio-selection UI for picking exactly one subject per department for single-day exams.
   - `ExamSchedulerView.jsx`: Visual Exam Scheduler supporting Department-Wise, Visual Date Grid (`FN`/`AN`), and Single-Day views, inline slot editing with override authorization, `Confirm & Finalize Timetable`, and Excel/CSV/Print exports.
   - `ConflictReportView.jsx`: Violation summary cards, parallel-department advisories, inline invigilator override controls, and conflict report persistence.
-- **Hall Seating & Student Organization**:
+- **Hall Seating**:
   - `SeatingArrangementView.jsx`: Hall capacity allocation configurator, Best-Fit preview/save, student hall lookup by registration number, 4 report tabs (`Combined Hall Report`, `Dept-Wise Report`, `Student Individual List`, `Visual Seat Grid`), and PDF/Excel/Print exports.
-  - `SubsectionDivisionView.jsx`: Alphabetical subsection division (`A`, `B`, `C`, ...) preserving registration numbers, duplicate/missing validation warnings, rebalance approval banner, and CSV/Print export.
 - **Master Data & Exports**:
   - `DepartmentManagementView.jsx`, `SubjectManagementView.jsx`, `HallManagementView.jsx`, `FacultyManagementView.jsx`: Dedicated CRUD modules with search, filters, inline editing, availability toggles, and deletion confirmations.
   - `EntityManagerView.jsx`: Unified 4-tab master data console (`Students & Batches`, `Examination Halls`, `Faculty`, `Subjects & Exams`) with cascading Department → Batch → Section filters and inline student transfers.

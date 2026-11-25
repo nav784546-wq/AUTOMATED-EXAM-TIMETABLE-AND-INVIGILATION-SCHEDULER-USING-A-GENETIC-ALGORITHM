@@ -1,6 +1,6 @@
 # ExamGrid GA — Automated Exam Timetable & Invigilation Scheduler
 
-**ExamGrid GA** is a full-stack administrator dashboard built to automate conflict-free university examination timetabling, optimize faculty invigilation duties, plan multi-department hall seating arrangements, divide students into balanced subsections, and export formatted Excel, PDF, and CSV reports.
+**ExamGrid GA** is a full-stack administrator dashboard built to automate conflict-free university examination timetabling, optimize faculty invigilation duties, plan multi-department hall seating arrangements, and export formatted Excel, PDF, and CSV reports.
 
 ---
 
@@ -20,7 +20,6 @@
 - **Visual Exam Scheduler & Structured Excel Export**: Department-wise, Visual Date Grid (`FN`/`AN`), and Single-Day views with inline editing, override authorization, pre-export date validation, and multi-worksheet `.xlsx` reports (`exceljs`).
 - **Student Cohort Conflict Heatmap & Quick-Fix Assistant**: Interactive cohort × date/session conflict matrix with severity levels, top-3 minimal-disruption slot suggestions, and atomic **Auto-Resolve All**.
 - **Hall Seating Allocation & Visual Seat Maps**: Best-Fit multi-hall seating preserving ascending registration numbers, student seat lookup, visual seat grids, and 4-sheet `.xlsx` / PDF exports.
-- **Alphabetical Subsection Division**: Splits department cohorts into balanced alphabetical subsections (`A`, `B`, `C`, ...) with duplicate registration detection.
 - **Master Data & RBAC Administration**: Full CRUD for Departments, Sections, Batches, Subjects, Halls, Faculty, and Students; Firebase Authentication (Email/Password + Google), secure `/reset-password` flow with `PasswordStrengthMeter`, and Super Admin **Latest System Audit Logs**.
 
 ---
@@ -79,7 +78,7 @@
 
 ## 6. Dashboard Usage & Database Overview
 
-- Navigate through the 13 sidebar tabs (**Overview**, **GA Scheduler**, **Visual Exam Scheduler**, **Hall Seating**, **Conflict Report**, **Subsections**, **Departments**, **Subjects**, **Halls**, **Faculty**, **Manage Data**, **Reports & Export**, and **Admin Management**).
+- Navigate through the 12 sidebar tabs (**Overview**, **GA Scheduler**, **Visual Exam Scheduler**, **Hall Seating**, **Conflict Report**, **Departments**, **Subjects**, **Halls**, **Faculty**, **Manage Data**, **Reports & Export**, and **Admin Management**).
 - **Dual Persistence**: When signed in via Firebase Authentication, changes sync to Cloud Firestore (17 collections protected by `firestore.rules`) and mirror to the local Python API. When running locally via `?autostart=1`, data persists directly in `backend/examgrid.db` (19 SQLite tables seeded with sample academic data on first launch).
 
 ---
